@@ -103,6 +103,59 @@ io.on('connection', (socket) => {
     console.log(`Stop sharing forwarded to room ${data.roomId}`);
   });
 
+  // Remote Access Events
+  socket.on('remote-access-request', (data) => {
+    console.log('Remote access request from', data.fromUserId, 'to', data.targetUserId, 'for room', data.roomId);
+    const targetSocket = clients.get(data.targetUserId);
+    if (targetSocket && targetSocket.connected) {
+      targetSocket.emit('remote-access-request', data);
+      console.log(`Remote access request forwarded to ${data.targetUserId}`);
+    } else {
+      console.log(`Target user ${data.targetUserId} not found for remote access request`);
+    }
+  });
+
+  socket.on('remote-access-offer', (data) => {
+    console.log(`Received remote access offer for room ${data.roomId} to ${data.targetUserId}`);
+    const targetSocket = clients.get(data.targetUserId);
+    if (targetSocket && targetSocket.connected) {
+      targetSocket.emit('remote-access-offer', data);
+      console.log(`Remote access offer forwarded to ${data.targetUserId}`);
+    } else {
+      console.log(`Target user ${data.targetUserId} not found for remote access offer`);
+    }
+  });
+
+  socket.on('remote-access-answer', (data) => {
+    console.log(`Received remote access answer for room ${data.roomId}`);
+    socket.to(data.roomId).emit('remote-access-answer', data);
+    console.log(`Remote access answer forwarded to room ${data.roomId}`);
+  });
+
+  socket.on('remote-access-ice-candidate', (data) => {
+    console.log(`Received remote access ICE candidate for room ${data.roomId}`);
+    socket.to(data.roomId).emit('remote-access-ice-candidate', data);
+    console.log(`Remote access ICE candidate forwarded to room ${data.roomId}`);
+  });
+
+  socket.on('remote-access-stop', (data) => {
+    console.log(`Stop remote access for room ${data.roomId}`);
+    socket.to(data.roomId).emit('remote-access-stopped', data);
+    console.log(`Stop remote access forwarded to room ${data.roomId}`);
+  });
+
+  // Remote Access Debug Messages
+  socket.on('remote-access-debug', (data) => {
+    console.log('Remote access debug message from', data.fromUserId, 'to', data.toUserId, ':', data.message);
+    const targetSocket = clients.get(data.toUserId);
+    if (targetSocket && targetSocket.connected) {
+      targetSocket.emit('remote-access-debug', data);
+      console.log(`Debug message forwarded to ${data.toUserId}`);
+    } else {
+      console.log(`Target user ${data.toUserId} not found for debug message`);
+    }
+  });
+
   socket.on('disconnect', (reason) => {
     console.log('Client disconnected:', socket.id, 'reason:', reason);
     
