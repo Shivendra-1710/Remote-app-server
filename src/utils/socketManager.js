@@ -15,7 +15,7 @@ class SocketManager {
   constructor(server, options = {}) {
     this.io = new Server(server, {
       cors: {
-        origin: process.env.CLIENT_URL || "http://localhost:5173",
+        origin: process.env.CLIENT_URL || "https://remotely1.netlify.app",
         methods: ["GET", "POST"],
         credentials: true
       },
